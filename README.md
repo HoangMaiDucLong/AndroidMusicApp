@@ -1,1 +1,2 @@
-"# Android Music App" 
+# Android Music App
+Music Player app for Android Tutorial
