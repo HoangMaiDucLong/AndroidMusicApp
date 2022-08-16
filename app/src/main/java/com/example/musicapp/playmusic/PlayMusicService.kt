@@ -10,7 +10,6 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.musicapp.Constants.BUNDLE_KEY

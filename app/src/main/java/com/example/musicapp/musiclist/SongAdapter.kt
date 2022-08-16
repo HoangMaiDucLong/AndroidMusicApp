@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,9 +83,7 @@ class SongAdapter(private val ctx: Context) : RecyclerView.Adapter<SongAdapter.S
         }
     }
 
-    private fun onSongMenuClick(song: Song) {
-        Log.d("SongMenu", "Clicked")
-    }
+    private fun onSongMenuClick(song: Song) {}
 
     override fun getItemCount(): Int = songList.size
 

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -179,7 +178,6 @@ class MainActivity : AppCompatActivity(), ISongItemClickListener, IMusicAdaptLis
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun startSeekbar(songDuration: Int){
-        Log.d("duration", songDuration.toString())
         durationTextView.text = Utils.durationToString(songDuration)
         seekBar.max = songDuration
         seekBar.min = 0

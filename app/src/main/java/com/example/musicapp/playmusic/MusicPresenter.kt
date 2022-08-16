@@ -16,17 +16,11 @@ import com.example.musicapp.musiclist.Song
 class MusicPresenter(private val ctx: Context) {
     private val songs = ArrayList<Song>()
 
-    /**
-     * Update cached song list and populate the main activity adapter with the list
-     */
     fun requestAllSongs() {
         updateSongs()
         (ctx as IMusicAdaptListener).setAdapterData(songs)
     }
 
-    /**
-     * Update cached song list
-     */
     private fun updateSongs() {
         songs.apply {
             clear()
@@ -34,10 +28,6 @@ class MusicPresenter(private val ctx: Context) {
         }
     }
 
-    /**
-     * Populate song list's data
-     * and start PlayMusicService with a random song
-     */
     fun launch(){
         requestAllSongs()
         songs[songs.indices.random()].also { launchSong ->
@@ -46,39 +36,23 @@ class MusicPresenter(private val ctx: Context) {
         sendActionToService(MusicAction.LAUNCH)
     }
 
-    /**
-     * Start playing a song from the beginning
-     * @param song the song to play
-     */
     fun playSong(song: Song){
         sendActionToService(MusicAction.PLAY, song)
         (ctx as IMusicAdaptListener).startSeekbar(song.length.toInt())
     }
 
-    /**
-     * Resume playing the currently paused song
-     */
     fun resumeSong(){
         sendActionToService(MusicAction.RESUME)
     }
 
-    /**
-     * Pause the currently playing song
-     */
     fun pauseSong(){
         sendActionToService(MusicAction.PAUSE)
     }
 
-    /**
-     * Play the next song in the list
-     */
     fun nextSong(){
         sendActionToService(MusicAction.NEXT)
     }
 
-    /**
-     * Play the previous song in the list
-     */
     fun prevSong(){
         sendActionToService(MusicAction.PREVIOUS)
     }
