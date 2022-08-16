@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import com.example.musicapp.musiclist.Song
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
@@ -58,21 +57,33 @@ class LoadMusicCallable(private val ctx: Context) : Callable<List<Song>> {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private val projection = arrayOf(
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.RELATIVE_PATH
-    )
+    private val projection =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.RELATIVE_PATH,
+            )
+        else
+            arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.ARTIST,
+            )
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private val selection = "${MediaStore.Audio.Media.RELATIVE_PATH} LIKE ?"
+    private val selection =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            "${MediaStore.Audio.Media.RELATIVE_PATH} LIKE ?"
+        else null
 
-    private val selectionArgs = arrayOf(musicFolderRelativePath)
+    private val selectionArgs =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            arrayOf(musicFolderRelativePath)
+        else null
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun call(): List<Song> {
         val res: List<Song> = arrayListOf()
         ctx.applicationContext.contentResolver.query(

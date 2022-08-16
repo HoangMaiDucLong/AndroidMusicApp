@@ -10,10 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
+import com.example.musicapp.databinding.SongItemBinding
 
 data class Song(val title: String?, val length: Long, val artist: String?, val uri: Uri?) : Parcelable {
     constructor(parcel: Parcel) : this(
@@ -60,19 +60,20 @@ class SongAdapter(private val ctx: Context) : RecyclerView.Adapter<SongAdapter.S
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder =
-        LayoutInflater.from(parent.context).inflate(R.layout.song_item, parent, false).let {
-            SongViewHolder(it)
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
+        val itemBinding = SongItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return SongViewHolder(itemBinding.root, itemBinding)
+    }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         songList[position].apply {
             holder.title.text = this.title
             holder.artist.text = this.artist
             holder.thumbnail.also {
                 it.setImageDrawable(AppCompatResources.getDrawable(holder.itemView.context, R.drawable.default_noti_background))
-                it.clipToOutline = true
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    it.clipToOutline = true
+                }
             }
             holder.menuToggle.setOnClickListener {
                 onSongMenuClick(this)
@@ -87,10 +88,10 @@ class SongAdapter(private val ctx: Context) : RecyclerView.Adapter<SongAdapter.S
 
     override fun getItemCount(): Int = songList.size
 
-    class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-        val title: TextView = itemView.findViewById(R.id.song_title)
-        val artist: TextView = itemView.findViewById(R.id.song_artist)
-        val thumbnail: ImageView = itemView.findViewById(R.id.song_thumbnail)
-        val menuToggle: ImageView = itemView.findViewById(R.id.song_menu)
+    class SongViewHolder(itemView: View, binding: SongItemBinding) : RecyclerView.ViewHolder(itemView){
+        val title: TextView = binding.songTitle
+        val artist: TextView = binding.songArtist
+        val thumbnail: ImageView = binding.songThumbnail
+        val menuToggle: ImageView = binding.songMenu
     }
 }

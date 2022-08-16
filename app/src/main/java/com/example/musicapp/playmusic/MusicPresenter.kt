@@ -3,66 +3,75 @@ package com.example.musicapp.playmusic
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
-import androidx.core.app.ShareCompat
 import com.example.musicapp.Constants.BUNDLE_KEY
 import com.example.musicapp.Constants.MUSIC_ACTION_KEY
 import com.example.musicapp.Constants.SEEKBAR_PROGRESS_BUNDLE_KEY
 import com.example.musicapp.Constants.SONG_BUNDLE_KEY
-import com.example.musicapp.DetailActivity
 import com.example.musicapp.musiclist.Song
 
-class MusicPresenter(private val ctx: Context) {
+class MusicPresenter(private val dataSource: MusicRepository) : MusicsContract.Presenter {
     private val songs = ArrayList<Song>()
+    private var mView : MusicsContract.View? = null
 
-    fun requestAllSongs() {
-        updateSongs()
-        (ctx as IMusicAdaptListener).setAdapterData(songs)
+//    fun requestAllSongs(ctx : Context) {
+//        updateSongs(ctx)
+//        mView?.onFetchSongsSuccess(songs)
+//    }
+//
+//    private fun updateSongs(ctx : Context) {
+//        songs.apply {
+//            clear()
+//            addAll(MusicRepository.getInstance(ctx).getAllSongs())
+//        }
+//    }
+
+    fun setView(view : MusicsContract.View){
+        mView = view
     }
 
-    private fun updateSongs() {
-        songs.apply {
-            clear()
-            addAll(MusicRepository.getInstance(ctx).getAllSongs())
-        }
+    override fun launchSong(ctx: Context){
+        getLocalSongs()
+//        songs[songs.indices.random()].also { launchSong ->
+//            sendActionToService(ctx, MusicAction.LAUNCH, launchSong)
+//        }
+        sendActionToService(ctx, MusicAction.LAUNCH)
     }
 
-    fun launch(){
-        requestAllSongs()
-        songs[songs.indices.random()].also { launchSong ->
-            sendActionToService(MusicAction.LAUNCH, launchSong)
-        }
-        sendActionToService(MusicAction.LAUNCH)
+    override fun playSong(ctx: Context, song: Song){
+        sendActionToService(ctx, MusicAction.PLAY, song)
+        mView?.startSeekbar(song.length.toInt())
     }
 
-    fun playSong(song: Song){
-        sendActionToService(MusicAction.PLAY, song)
-        (ctx as IMusicAdaptListener).startSeekbar(song.length.toInt())
+    override fun resumeSong(ctx : Context){
+        sendActionToService(ctx, MusicAction.RESUME)
     }
 
-    fun resumeSong(){
-        sendActionToService(MusicAction.RESUME)
+    override fun pauseSong(ctx: Context){
+        sendActionToService(ctx, MusicAction.PAUSE)
     }
 
-    fun pauseSong(){
-        sendActionToService(MusicAction.PAUSE)
+    override fun nextSong(ctx: Context){
+        sendActionToService(ctx, MusicAction.NEXT)
     }
 
-    fun nextSong(){
-        sendActionToService(MusicAction.NEXT)
+    override fun prevSong(ctx: Context){
+        sendActionToService(ctx, MusicAction.PREVIOUS)
     }
 
-    fun prevSong(){
-        sendActionToService(MusicAction.PREVIOUS)
+    override fun getLocalSongs() {
+//        songs.apply {
+//            clear()
+//            addAll()
+//        }
+        mView?.onFetchSongsSuccess(dataSource.getAllSongs())
     }
 
     /**
      * Seek to a time position in the song
      * @param progress offset from the beginning of the song, in milliseconds
      */
-    fun seekTo(progress: Int){
-        Intent(ctx.applicationContext, PlayMusicService::class.java).also { intent ->
+    fun seekTo(ctx: Context, progress: Int){
+        Intent(ctx, PlayMusicService::class.java).also { intent ->
             val bundle = Bundle().also {
                 it.putInt(SEEKBAR_PROGRESS_BUNDLE_KEY, progress)
                 it.putSerializable(MUSIC_ACTION_KEY, MusicAction.SEEK)
@@ -78,7 +87,7 @@ class MusicPresenter(private val ctx: Context) {
      * @param song the song to be sent with intent, default value is null if action doesn't need
      * to be sent with a song
      */
-    private fun sendActionToService(action: MusicAction, song: Song? = null){
+    private fun sendActionToService(ctx: Context, action: MusicAction, song: Song? = null){
         Intent(ctx.applicationContext, PlayMusicService::class.java).also { intent ->
             val bundle = Bundle().also {
                 it.putParcelable(SONG_BUNDLE_KEY, song)

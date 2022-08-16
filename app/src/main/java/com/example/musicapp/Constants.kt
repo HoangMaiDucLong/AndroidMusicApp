@@ -5,4 +5,5 @@ object Constants {
     const val MUSIC_ACTION_KEY = "action_music"
     const val BUNDLE_KEY = "bundle"
     const val SEEKBAR_PROGRESS_BUNDLE_KEY = "progress"
+    const val IS_PLAYING_KEY = "is_playing"
 }

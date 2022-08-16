@@ -13,6 +13,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.musicapp.Constants.BUNDLE_KEY
+import com.example.musicapp.Constants.IS_PLAYING_KEY
 import com.example.musicapp.Constants.MUSIC_ACTION_KEY
 import com.example.musicapp.Constants.SEEKBAR_PROGRESS_BUNDLE_KEY
 import com.example.musicapp.Constants.SONG_BUNDLE_KEY
@@ -89,7 +90,6 @@ class PlayMusicService : Service() {
     private fun handleActionEvent(bundle: Bundle?){
         when(bundle?.getSerializable(MUSIC_ACTION_KEY) as MusicAction){
             MusicAction.LAUNCH -> {
-                song = bundle.getParcelable(SONG_BUNDLE_KEY) ?: song
                 launchMusic()
             }
             MusicAction.PLAY -> {
@@ -109,14 +109,25 @@ class PlayMusicService : Service() {
     }
 
     private fun launchMusic(){
-        setSongInfoToNotification()
-        setNewSongToPlayer()
-        sendNotification()
-        notifyMainWithAction(MusicAction.LAUNCH)
+        if(song == null) {
+            song = songs[songs.indices.random()]
+            setSongInfoToNotification()
+            setSongToPlayer()
+            sendNotification()
+            notifyMainWithAction(MusicAction.LAUNCH)
+        } else {
+            Intent(MUSIC_ACTION_KEY).also { intent ->
+                intent.putExtra(MUSIC_ACTION_KEY, MusicAction.RESTORE_PROGRESS)
+                intent.putExtra(SONG_BUNDLE_KEY, song)
+                intent.putExtra(IS_PLAYING_KEY, player?.isPlaying)
+                intent.putExtra(SEEKBAR_PROGRESS_BUNDLE_KEY, player?.currentPosition)
+                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+            }
+        }
     }
 
     private fun playMusic() {
-        setNewSongToPlayer()
+        setSongToPlayer()
         setSongInfoToNotification()
         player?.start()
         sendNotification()
@@ -154,7 +165,7 @@ class PlayMusicService : Service() {
         player?.seekTo(progress)
     }
 
-    private fun setNewSongToPlayer(){
+    private fun setSongToPlayer(){
         player?.apply {
             song?.uri?.let {
                 reset()
@@ -273,5 +284,6 @@ enum class MusicAction : Serializable {
     RESUME,
     CLEAR,
     SEEK,
-    UPDATE_PROGRESS
+    UPDATE_PROGRESS,
+    RESTORE_PROGRESS
 }
